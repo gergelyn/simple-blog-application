@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 
 class PostController extends Controller
 {
@@ -26,7 +25,7 @@ class PostController extends Controller
     public function index(Request $request): JsonResponse
     {
         try {
-            $perPage = min($request->get('per_page', 10), 50); // Max 50 per page
+            $perPage = min($request->get('per_page', 10), 50);
             $posts = $this->postService->getAllPosts($perPage);
 
             return response()->json(new PostCollection($posts));
@@ -52,7 +51,7 @@ class PostController extends Controller
     public function store(StorePostRequest $request): JsonResponse
     {
         try {
-            Gate::authorize('create', Post::class);
+            $this->authorize('create', Post::class);
 
             $post = $this->postService->createPost(
                 Auth::user(),
@@ -110,7 +109,7 @@ class PostController extends Controller
         try {
             $post = $this->postService->getPostById((int) $id);
             
-            Gate::authorize('update', $post);
+            $this->authorize('update', $post);
 
             $updatedPost = $this->postService->updatePost(
                 $post,
@@ -145,7 +144,7 @@ class PostController extends Controller
         try {
             $post = $this->postService->getPostById((int) $id);
             
-            Gate::authorize('delete', $post);
+            $this->authorize('delete', $post);
 
             $this->postService->deletePost($post);
 

@@ -32,7 +32,12 @@ class PostService
     public function getPostById(int $id): Post
     {
         try {
-            return Post::with('user:id,name,email')->findOrFail($id);
+            return Post::with([
+                'user:id,name,email',
+                'comments' => function ($query) {
+                    $query->with('user:id,name')->latest();
+                }
+            ])->withCount('comments')->findOrFail($id);
         } catch (ModelNotFoundException $e) {
             Log::warning("Post not found: {$id}");
             throw $e;

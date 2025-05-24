@@ -20,6 +20,8 @@ class PostResource extends JsonResource
                 'id' => $this->user->id,
                 'name' => $this->user->name
             ],
+            'comments' => CommentResource::collection($this->whenLoaded('comments')),
+            'comments_count' => $this->whenCounted('comments'),
             'created_at' => $this->created_at->toISOString(),
             'updated_at' => $this->updated_at->toISOString(),
             'created_at_human' => $this->created_at->diffForHumans(),
