@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simple-blog-application
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    networks:
+      - simple-blog-application-network
+    depends_on:
+      - mysql
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: simple-blog-application-nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - simple-blog-application-network
+    depends_on:
+      - app
+
+  mysql:
+    image: mysql:8.0
+    container_name: simple-blog-application-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${FORWARD_DB_PORT}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - simple-blog-application-network
+
+networks:
+  simple-blog-application-network:
+
+volumes:
+  mysql_data:
