@@ -10,7 +10,7 @@ class CommentPolicy
     /**
      * Determine whether the user can delete the comment.
      */
-    public function delete(User $user, Comment $comment): bool
+    public function delete(?User $user, Comment $comment): bool
     {
         if (!$user) {
             return false;
