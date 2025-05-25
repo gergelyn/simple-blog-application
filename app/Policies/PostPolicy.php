@@ -19,8 +19,13 @@ class PostPolicy
     /**
      * Determine whether the user can update the post.
      */
-    public function update(User $user, Post $post): bool
+    public function update(?User $user, Post $post): bool
     {
+        // Unauthenticated users cannot update posts
+        if (!$user) {
+            return false;
+        }
+
         // Only the post owner can update
         return $user->id === $post->user_id;
     }
@@ -28,8 +33,13 @@ class PostPolicy
     /**
      * Determine whether the user can delete the post.
      */
-    public function delete(User $user, Post $post): bool
+    public function delete(?User $user, Post $post): bool
     {
+        // Unauthenticated users cannot delete posts
+        if (!$user) {
+            return false;
+        }
+
         // Only the post owner can delete
         return $user->id === $post->user_id;
     }
