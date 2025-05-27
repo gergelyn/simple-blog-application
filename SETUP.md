@@ -26,10 +26,11 @@ cp .env.example .env
 
 The default `.env` file is already configured for Docker. Key settings:
 ```env
-DB_HOST=mysql
+DB_HOST=simple-blog-application-mysql
 DB_DATABASE=simple_blog_application
-DB_USERNAME=laravel_user
-DB_PASSWORD=laravel_password
+DB_USERNAME=simple_blog_application_user
+DB_PASSWORD=test12345
+FORWARD_DB_PORT=3342
 ```
 
 ### 3. Build and Start the Application
