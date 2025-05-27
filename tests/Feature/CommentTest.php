@@ -39,7 +39,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson("/api/posts/{$this->post->id}/comments", $commentData);
+        ])->postJson(route('api.posts.comments.store', $this->post->id), $commentData);
 
         $response->assertStatus(201)
             ->assertJson([
@@ -71,7 +71,7 @@ class CommentTest extends TestCase
             'guest_name' => 'John Doe',
         ];
 
-        $response = $this->postJson("/api/posts/{$this->post->id}/comments", $commentData);
+        $response = $this->postJson(route('api.posts.comments.store', $this->post->id), $commentData);
 
         $response->assertStatus(201)
             ->assertJson([
@@ -102,7 +102,7 @@ class CommentTest extends TestCase
             'comment' => 'Great post! I really enjoyed reading it.',
         ];
 
-        $response = $this->postJson("/api/posts/{$this->post->id}/comments", $commentData);
+        $response = $this->postJson(route('api.posts.comments.store', $this->post->id), $commentData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['guest_name'])
@@ -126,7 +126,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson("/api/posts/{$this->post->id}/comments", $commentData);
+        ])->postJson(route('api.posts.comments.store', $this->post->id), $commentData);
 
         $response->assertStatus(201);
 
@@ -145,7 +145,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson("/api/posts/{$this->post->id}/comments", []);
+        ])->postJson(route('api.posts.comments.store', $this->post->id), []);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['comment']);
@@ -163,7 +163,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson("/api/posts/{$this->post->id}/comments", $commentData);
+        ])->postJson(route('api.posts.comments.store', $this->post->id), $commentData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['comment']);
@@ -181,7 +181,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson("/api/posts/{$this->post->id}/comments", $commentData);
+        ])->postJson(route('api.posts.comments.store', $this->post->id), $commentData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['comment']);
@@ -199,7 +199,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson('/api/posts/999/comments', $commentData);
+        ])->postJson(route('api.posts.comments.store', 999), $commentData);
 
         $response->assertStatus(404);
     }
@@ -217,7 +217,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->deleteJson("/api/comments/{$comment->id}");
+        ])->deleteJson(route('api.comments.destroy', $comment->id));
 
         $response->assertStatus(200)
             ->assertJson([
@@ -242,7 +242,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->deleteJson("/api/comments/{$comment->id}");
+        ])->deleteJson(route('api.comments.destroy', $comment->id));
 
         $response->assertStatus(200)
             ->assertJson([
@@ -268,7 +268,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->deleteJson("/api/comments/{$comment->id}");
+        ])->deleteJson(route('api.comments.destroy', $comment->id));
 
         $response->assertStatus(403);
 
@@ -286,7 +286,7 @@ class CommentTest extends TestCase
             'guest_name' => 'Guest User',
         ]);
 
-        $response = $this->deleteJson("/api/comments/{$comment->id}");
+        $response = $this->deleteJson(route('api.comments.destroy', $comment->id));
 
         $response->assertStatus(401);
 
@@ -303,7 +303,7 @@ class CommentTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->deleteJson('/api/comments/999');
+        ])->deleteJson(route('api.comments.destroy', 999));
 
         $response->assertStatus(404);
     }
@@ -313,7 +313,7 @@ class CommentTest extends TestCase
     {
         Comment::factory()->count(3)->create(['post_id' => $this->post->id]);
 
-        $response = $this->getJson("/api/posts/{$this->post->id}");
+        $response = $this->getJson(route('api.posts.show', $this->post->id));
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -355,7 +355,7 @@ class CommentTest extends TestCase
             'created_at' => now(),
         ]);
 
-        $response = $this->getJson("/api/posts/{$this->post->id}");
+        $response = $this->getJson(route('api.posts.show', $this->post->id));
 
         $comments = $response->json('data.comments');
         $this->assertEquals($secondComment->id, $comments[0]['id']);
@@ -370,7 +370,7 @@ class CommentTest extends TestCase
             'guest_name' => 'A',
         ];
 
-        $response = $this->postJson("/api/posts/{$this->post->id}/comments", $commentData);
+        $response = $this->postJson(route('api.posts.comments.store', $this->post->id), $commentData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['guest_name']);
@@ -384,7 +384,7 @@ class CommentTest extends TestCase
             'guest_name' => str_repeat('a', 101),
         ];
 
-        $response = $this->postJson("/api/posts/{$this->post->id}/comments", $commentData);
+        $response = $this->postJson(route('api.posts.comments.store', $this->post->id), $commentData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['guest_name']);

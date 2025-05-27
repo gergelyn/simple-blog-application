@@ -29,7 +29,7 @@ class PostTest extends TestCase
     {
         Post::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/posts');
+        $response = $this->getJson(route('api.posts.index'));
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -58,7 +58,7 @@ class PostTest extends TestCase
     {
         $post = Post::factory()->create();
 
-        $response = $this->getJson("/api/posts/{$post->id}");
+        $response = $this->getJson(route('api.posts.show', $post->id));
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -90,7 +90,7 @@ class PostTest extends TestCase
     #[Test]
     public function it_returns_404_for_non_existent_post()
     {
-        $response = $this->getJson('/api/posts/999');
+        $response = $this->getJson(route('api.posts.show', 999));
 
         $response->assertStatus(404)
             ->assertJson([
@@ -111,7 +111,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson('/api/posts', $postData);
+        ])->postJson(route('api.posts.store'), $postData);
 
         $response->assertStatus(201)
             ->assertJson([
@@ -141,7 +141,7 @@ class PostTest extends TestCase
             'content' => $this->faker->paragraphs(3, true),
         ];
 
-        $response = $this->postJson('/api/posts', $postData);
+        $response = $this->postJson(route('api.posts.store'), $postData);
 
         $response->assertStatus(401);
     }
@@ -158,7 +158,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson('/api/posts', $postData);
+        ])->postJson(route('api.posts.store'), $postData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['title']);
@@ -176,7 +176,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->postJson('/api/posts', $postData);
+        ])->postJson(route('api.posts.store'), $postData);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['content']);
@@ -196,7 +196,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->putJson("/api/posts/{$post->id}", $updateData);
+        ])->putJson(route('api.posts.update', $post->id), $updateData);
 
         $response->assertStatus(200)
             ->assertJson([
@@ -230,7 +230,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->putJson("/api/posts/{$post->id}", $updateData);
+        ])->putJson(route('api.posts.update', $post->id), $updateData);
 
         $response->assertStatus(403);
     }
@@ -245,7 +245,7 @@ class PostTest extends TestCase
             'content' => 'This should not be allowed.',
         ];
 
-        $response = $this->putJson("/api/posts/{$post->id}", $updateData);
+        $response = $this->putJson(route('api.posts.update', $post->id), $updateData);
 
         $response->assertStatus(401);
     }
@@ -259,7 +259,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->deleteJson("/api/posts/{$post->id}");
+        ])->deleteJson(route('api.posts.destroy', $post->id));
 
         $response->assertStatus(200)
             ->assertJson([
@@ -280,7 +280,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->deleteJson("/api/posts/{$post->id}");
+        ])->deleteJson(route('api.posts.destroy', $post->id));
 
         $response->assertStatus(403);
 
@@ -294,7 +294,7 @@ class PostTest extends TestCase
     {
         $post = Post::factory()->create();
 
-        $response = $this->deleteJson("/api/posts/{$post->id}");
+        $response = $this->deleteJson(route('api.posts.destroy', $post->id));
 
         $response->assertStatus(401);
     }
@@ -312,7 +312,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->putJson('/api/posts/999', $updateData);
+        ])->putJson(route('api.posts.update', 999), $updateData);
 
         $response->assertStatus(404);
     }
@@ -325,7 +325,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->deleteJson('/api/posts/999');
+        ])->deleteJson(route('api.posts.destroy', 999));
 
         $response->assertStatus(404);
     }
@@ -335,7 +335,7 @@ class PostTest extends TestCase
     {
         Post::factory()->count(25)->create();
 
-        $response = $this->getJson('/api/posts?per_page=10');
+        $response = $this->getJson(route('api.posts.index', ['per_page' => 10]));
 
         $response->assertStatus(200)
             ->assertJsonStructure([
@@ -367,7 +367,7 @@ class PostTest extends TestCase
     {
         Post::factory()->count(100)->create();
 
-        $response = $this->getJson('/api/posts?per_page=100');
+        $response = $this->getJson(route('api.posts.index', ['per_page' => 100]));
 
         $response->assertStatus(200);
         $this->assertEquals(50, $response->json('meta.per_page'));
@@ -387,7 +387,7 @@ class PostTest extends TestCase
         $response = $this->withHeaders([
             'Authorization' => 'Bearer ' . $token,
             'Accept' => 'application/json',
-        ])->putJson("/api/posts/{$post->id}", [
+        ])->putJson(route('api.posts.update', $post->id), [
             'content' => $newContent,
         ]);
 

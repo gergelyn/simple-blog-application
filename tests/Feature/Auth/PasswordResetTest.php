@@ -18,7 +18,7 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->post('/api/forgot-password', ['email' => $user->email]);
+        $this->post(route('password.email', ['email' => $user->email]));
 
         Notification::assertSentTo($user, ResetPassword::class);
     }
@@ -29,15 +29,15 @@ class PasswordResetTest extends TestCase
 
         $user = User::factory()->create();
 
-        $this->post('/api/forgot-password', ['email' => $user->email]);
+        $this->post(route('password.email', ['email' => $user->email]));
 
         Notification::assertSentTo($user, ResetPassword::class, function (object $notification) use ($user) {
-            $response = $this->post('/api/reset-password', [
+            $response = $this->post(route('password.store', [
                 'token' => $notification->token,
                 'email' => $user->email,
                 'password' => 'password',
                 'password_confirmation' => 'password',
-            ]);
+            ]));
 
             $response
                 ->assertSessionHasNoErrors()

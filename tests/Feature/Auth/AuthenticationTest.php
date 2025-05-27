@@ -14,10 +14,10 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson(route('login', [
             'email' => $user->email,
             'password' => 'password',
-        ]);
+        ]));
 
         $response->assertStatus(200)
             ->assertJsonStructure(['token', 'user']);
@@ -29,10 +29,10 @@ class AuthenticationTest extends TestCase
             'password' => bcrypt('password'),
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson(route('login', [
             'email' => $user->email,
             'password' => 'wrong-password',
-        ]);
+        ]));
 
         $response->assertStatus(422);
     }
@@ -46,7 +46,7 @@ class AuthenticationTest extends TestCase
         $token = $user->createToken('test-token')->plainTextToken;
 
         $logoutResponse = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->postJson('/api/logout');
+            ->postJson(route('logout'));
 
         $logoutResponse->assertStatus(200)
             ->assertJson(['message' => 'Logged out']);

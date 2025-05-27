@@ -9,7 +9,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts', [PostController::class, 'index'])->name('api.posts.index');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/posts/create', [PostController::class, 'create'])->name('api.posts.create');
@@ -18,10 +18,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/posts/{id}', [PostController::class, 'update'])->name('api.posts.update');
     Route::delete('/posts/{id}', [PostController::class, 'destroy'])->name('api.posts.destroy');
     
-    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->name('api.comments.destroy');
 });
 
-Route::get('/posts/{id}', [PostController::class, 'show']);
-Route::post('/posts/{id}/comments', [CommentController::class, 'store']);
+Route::get('/posts/{id}', [PostController::class, 'show'])->name('api.posts.show');
+Route::post('/posts/{id}/comments', [CommentController::class, 'store'])->name('api.posts.comments.store');
 
 require __DIR__.'/auth.php';
