@@ -56,12 +56,12 @@ This creates:
 
 ## Demo User Accounts
 
-| Email | Password | Role |
-|-------|----------|------|
-| john@example.com | password | Regular User |
-| jane@example.com | password | Regular User |
-| admin@example.com | password | Admin User |
-| demo@example.com | password | Demo User |
+| Email | Password |
+|-------|----------|
+| john@example.com | password |
+| jane@example.com | password |
+| admin@example.com | password |
+| demo@example.com | password |
 
 ## API Endpoints
 

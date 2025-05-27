@@ -3,9 +3,19 @@ set -e
 
 echo "🚀 Starting Simple Blog Application Development Environment..."
 
+# Ensure proper permissions for Laravel storage directories
+echo "🔧 Setting up storage permissions..."
+chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Create necessary directories if they don't exist
+mkdir -p /var/www/html/storage/framework/{views,cache,sessions}
+mkdir -p /var/www/html/storage/logs
+chmod -R 775 /var/www/html/storage/framework /var/www/html/storage/logs
+
 # Wait for database to be ready
 echo "⏳ Waiting for database connection..."
-until php artisan migrate:status > /dev/null 2>&1; do
+until php artisan tinker --execute="DB::connection()->getPdo();" > /dev/null 2>&1; do
     echo "Database not ready, waiting 2 seconds..."
     sleep 2
 done
@@ -27,7 +37,7 @@ else
 fi
 
 echo "🎉 Simple Blog Application is ready!"
-echo "📡 API endpoints available at: http://localhost:8080/api/posts"
+echo "📡 The API is available at: http://localhost:8080/api/"
 
 # Start PHP-FPM
 exec php-fpm 

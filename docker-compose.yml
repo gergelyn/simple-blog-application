@@ -9,6 +9,7 @@ services:
     restart: unless-stopped
     volumes:
       - .:/var/www/html
+      - vendor_volume:/var/www/html/vendor
     networks:
       - simple-blog-application-network
     depends_on:
@@ -49,3 +50,4 @@ networks:
 
 volumes:
   mysql_data:
+  vendor_volume:
