@@ -1,61 +1,249 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Simple Blog Application - Setup Guide
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This guide will help you set up and run the Laravel Blog Application locally using Docker.
 
-## About Laravel
+## Prerequisites
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Docker** (version 20.0 or higher)
+- **Docker Compose** (version 2.0 or higher)
+- **Git**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Quick Start
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 1. Clone the Repository
 
-## Learning Laravel
+```bash
+git clone <repository-url>
+cd simple-blog-application
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 2. Environment Configuration
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+Copy the example environment file:
+```bash
+cp .env.example .env
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+The default `.env` file is already configured for Docker. Key settings:
+```env
+DB_HOST=simple-blog-application-mysql
+DB_DATABASE=simple_blog_application
+DB_USERNAME=simple_blog_application_user
+DB_PASSWORD=test12345
+FORWARD_DB_PORT=3342
+```
 
-## Laravel Sponsors
+### 3. Build and Start the Application
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Build and start all containers:
+```bash
+docker-compose up -d --build
+```
 
-### Premium Partners
+This will start:
+- **app**: PHP-FPM application container
+- **nginx**: Web server (accessible on port 8080)
+- **mysql**: MySQL database (accessible on port 3342)
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+This creates:
+- 4 demo users with known credentials
+- ~40 blog posts with realistic content
+- ~150-200 comments (mix of user and guest comments)
 
-## Contributing
+## Access the Application
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- **API Base URL**: `http://localhost:8080/api`
+- **Database**: `localhost:3342` (from host machine)
 
-## Code of Conduct
+## Demo User Accounts
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Email | Password |
+|-------|----------|
+| john@example.com | password |
+| jane@example.com | password |
+| admin@example.com | password |
+| demo@example.com | password |
 
-## Security Vulnerabilities
+## API Endpoints
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Authentication
+- `POST /api/register` - Register a new user
+- `POST /api/login` - Login and get access token
+- `POST /api/logout` - Logout (revoke token)
 
-## License
+### Posts (Public)
+- `GET /api/posts` - List all posts (with pagination)
+- `GET /api/posts/{id}` - Get a specific post with comments
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Posts (Authenticated)
+- `GET /api/posts/create` - Get form structure for creating a new post
+- `POST /api/posts` - Create a new post
+- `GET /api/posts/{id}/edit` - Get form structure for editing a post (only by author)
+- `PUT /api/posts/{id}` - Update a post (only by author)
+- `DELETE /api/posts/{id}` - Delete a post (only by author)
+
+### Comments
+- `POST /api/posts/{id}/comments` - Add a comment (supports both authenticated users and guests)
+- `DELETE /api/comments/{id}` - Delete a comment (by comment author or post author)
+
+## Testing the API
+
+### 1. Register a new user:
+```bash
+curl -X POST http://localhost:8080/api/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Test User",
+    "email": "test@example.com",
+    "password": "password",
+    "password_confirmation": "password"
+  }'
+```
+
+### 2. Login to get a token:
+```bash
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "john@example.com",
+    "password": "password"
+  }'
+```
+
+### 3. Get all posts:
+```bash
+curl http://localhost:8080/api/posts
+```
+
+### 4. Create a post (replace YOUR_TOKEN):
+```bash
+curl -X POST http://localhost:8080/api/posts \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "My Docker Post",
+    "content": "This post was created via Docker setup!"
+  }'
+```
+
+### 5. Get form structure for creating a post (replace YOUR_TOKEN):
+```bash
+curl -X GET http://localhost:8080/api/posts/create \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+### 6. Get form structure for editing a post (replace YOUR_TOKEN and POST_ID):
+```bash
+curl -X GET http://localhost:8080/api/posts/1/edit \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+### 7. Add a comment as guest:
+```bash
+curl -X POST http://localhost:8080/api/posts/1/comments \
+  -H "Content-Type: application/json" \
+  -d '{
+    "guest_name": "Docker User",
+    "comment": "Great post! Docker setup works perfectly."
+  }'
+```
+
+## Running Tests
+
+Run the complete test suite:
+```bash
+docker-compose exec app php artisan test
+```
+
+Run specific test types:
+```bash
+# Feature tests only
+docker-compose exec app php artisan test --testsuite=Feature
+
+# Unit tests only
+docker-compose exec app php artisan test --testsuite=Unit
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Port conflicts:**
+   ```bash
+   # Check if ports are in use
+   netstat -an | grep :8080do
+   netstat -an | grep :3342
+   
+   # Change ports in docker-compose.yml if needed
+   ```
+
+2. **Permission issues:**
+   ```bash
+   # Fix storage permissions
+   docker-compose exec app chmod -R 775 storage bootstrap/cache
+   ```
+
+3. **Database connection issues:**
+   ```bash
+   # Check if MySQL is ready
+   docker-compose exec mysql mysqladmin ping -h localhost
+   
+   # Restart database
+   docker-compose restart mysql
+   ```
+
+4. **Container not starting:**
+   ```bash
+   # Check logs for errors
+   docker-compose logs app
+   
+   # Rebuild containers
+   docker-compose down
+   docker-compose up -d --build
+   ```
+
+### Reset Everything
+```bash
+# Stop and remove all containers, networks, and volumes
+docker-compose down -v
+
+# Remove images (optional)
+docker-compose down -v --rmi all
+
+# Start fresh
+docker-compose up -d
+```
+
+## Development Workflow
+
+1. **Make code changes** in your local files
+2. **Changes are automatically reflected** (volume mounting)
+3. **Run tests** to ensure everything works:
+   ```bash
+   docker-compose exec app php artisan test
+   ```
+4. **Check logs** if needed:
+   ```bash
+   docker-compose logs app
+   ```
+
+## Project Structure
+
+The Docker setup includes:
+- **PHP 8.4** with all required extensions
+- **Nginx** web server with optimized configuration
+- **MySQL 8.0** database
+- **Volume mounting** for live code reloading
+- **Network isolation** for security
+
+Your local code is mounted into the containers, so any changes you make are immediately reflected without rebuilding.
+
+## Support
+
+If you encounter issues:
+1. Check container logs: `docker-compose logs [service-name]`
+2. Verify all containers are running: `docker-compose ps`
+3. Ensure ports 8080 and 3342 are available
+4. Try rebuilding: `docker-compose up -d --build`
