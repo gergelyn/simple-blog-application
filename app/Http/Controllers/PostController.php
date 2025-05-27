@@ -6,6 +6,7 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostCollection;
 use App\Http\Resources\PostResource;
+use App\Http\Resources\PostFormResource;
 use App\Models\Post;
 use App\Services\PostService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -40,9 +41,25 @@ class PostController extends Controller
     /**
      * Show the form for creating a new post.
      */
-    public function create()
+    public function create(): JsonResponse
     {
-        
+        try {
+            $this->authorize('create', Post::class);
+
+            return response()->json([
+                'message' => 'Post creation form data.',
+                'form' => new PostFormResource(null)
+            ]);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'message' => 'You must be authenticated to create posts.'
+            ], 401);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to load form data.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**
@@ -96,9 +113,31 @@ class PostController extends Controller
     /**
      * Show the form for editing the specified post.
      */
-    public function edit(Post $post)
+    public function edit($id): JsonResponse
     {
+        try {
+            $post = $this->postService->getPostById((int) $id);
+            
+            $this->authorize('update', $post);
 
+            return response()->json([
+                'message' => 'Post edit form data.',
+                'form' => new PostFormResource($post)
+            ]);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'message' => 'Post not found.'
+            ], 404);
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return response()->json([
+                'message' => 'You can only edit your own posts.'
+            ], 403);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to load edit form data.',
+                'error' => config('app.debug') ? $e->getMessage() : 'Internal server error'
+            ], 500);
+        }
     }
 
     /**

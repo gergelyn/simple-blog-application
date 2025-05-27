@@ -75,7 +75,9 @@ This creates:
 - `GET /api/posts/{id}` - Get a specific post with comments
 
 ### Posts (Authenticated)
+- `GET /api/posts/create` - Get form structure for creating a new post
 - `POST /api/posts` - Create a new post
+- `GET /api/posts/{id}/edit` - Get form structure for editing a post (only by author)
 - `PUT /api/posts/{id}` - Update a post (only by author)
 - `DELETE /api/posts/{id}` - Delete a post (only by author)
 
@@ -123,7 +125,21 @@ curl -X POST http://localhost:8080/api/posts \
   }'
 ```
 
-### 5. Add a comment as guest:
+### 5. Get form structure for creating a post (replace YOUR_TOKEN):
+```bash
+curl -X GET http://localhost:8080/api/posts/create \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+### 6. Get form structure for editing a post (replace YOUR_TOKEN and POST_ID):
+```bash
+curl -X GET http://localhost:8080/api/posts/1/edit \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json"
+```
+
+### 7. Add a comment as guest:
 ```bash
 curl -X POST http://localhost:8080/api/posts/1/comments \
   -H "Content-Type: application/json" \
@@ -156,7 +172,7 @@ docker-compose exec app php artisan test --testsuite=Unit
 1. **Port conflicts:**
    ```bash
    # Check if ports are in use
-   netstat -an | grep :8080
+   netstat -an | grep :8080do
    netstat -an | grep :3342
    
    # Change ports in docker-compose.yml if needed

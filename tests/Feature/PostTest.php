@@ -397,4 +397,151 @@ class PostTest extends TestCase
         $this->assertEquals($originalTitle, $post->title);
         $this->assertEquals($newContent, $post->content);
     }
+
+    #[Test]
+    public function authenticated_user_can_get_create_form()
+    {
+        $token = $this->user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Accept' => 'application/json',
+        ])->getJson(route('api.posts.create'));
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'form' => [
+                    'fields' => [
+                        'title' => [
+                            'type',
+                            'label',
+                            'placeholder',
+                            'required',
+                            'validation',
+                            'value',
+                            'help_text',
+                        ],
+                        'content' => [
+                            'type',
+                            'label',
+                            'placeholder',
+                            'required',
+                            'validation',
+                            'value',
+                            'help_text',
+                            'rows',
+                        ],
+                    ],
+                    'validation_rules',
+                    'submit_url',
+                    'method',
+                ]
+            ])
+            ->assertJson([
+                'form' => [
+                    'method' => 'POST',
+                    'submit_url' => route('api.posts.store'),
+                ]
+            ]);
+    }
+
+    #[Test]
+    public function unauthenticated_user_cannot_get_create_form()
+    {
+        $response = $this->getJson(route('api.posts.create'));
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Unauthenticated.'
+            ]);
+    }
+
+    #[Test]
+    public function authenticated_user_can_get_edit_form_for_own_post()
+    {
+        $post = Post::factory()->create(['user_id' => $this->user->id]);
+        $token = $this->user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Accept' => 'application/json',
+        ])->getJson(route('api.posts.edit', $post->id));
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'form' => [
+                    'fields',
+                    'validation_rules',
+                    'submit_url',
+                    'method',
+                    'data' => [
+                        'id',
+                        'title',
+                        'content',
+                        'author',
+                        'created_at',
+                        'updated_at',
+                    ]
+                ]
+            ])
+            ->assertJson([
+                'form' => [
+                    'method' => 'PUT',
+                    'submit_url' => route('api.posts.update', $post->id),
+                    'data' => [
+                        'id' => $post->id,
+                        'title' => $post->title,
+                        'content' => $post->content,
+                    ]
+                ]
+            ]);
+    }
+
+    #[Test]
+    public function authenticated_user_cannot_get_edit_form_for_others_post()
+    {
+        $post = Post::factory()->create(['user_id' => $this->anotherUser->id]);
+        $token = $this->user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Accept' => 'application/json',
+        ])->getJson(route('api.posts.edit', $post->id));
+
+        $response->assertStatus(403)
+            ->assertJson([
+                'message' => 'You can only edit your own posts.'
+            ]);
+    }
+
+    #[Test]
+    public function unauthenticated_user_cannot_get_edit_form()
+    {
+        $post = Post::factory()->create();
+
+        $response = $this->getJson(route('api.posts.edit', $post->id));
+
+        $response->assertStatus(401)
+            ->assertJson([
+                'message' => 'Unauthenticated.'
+            ]);
+    }
+
+    #[Test]
+    public function get_edit_form_returns_404_for_non_existent_post()
+    {
+        $token = $this->user->createToken('test-token')->plainTextToken;
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+            'Accept' => 'application/json',
+        ])->getJson(route('api.posts.edit', 999));
+
+        $response->assertStatus(404)
+            ->assertJson([
+                'message' => 'Post not found.'
+            ]);
+    }
 } 
